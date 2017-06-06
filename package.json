@@ -1,0 +1,12 @@
+{
+  "name": "cir8",
+  "version": "0.0.0",
+  "description": "Cir8",
+  "main": "app.js",
+  "author": {
+    "name": "Manh Le"
+  },
+  "dependencies": {
+    "ctrl8": "0.0.14"
+  }
+}
