@@ -23,6 +23,18 @@ var Cir8 = {
         this.Connect(A, Conduit, Contact1);
         this.Connect(B, Conduit, Contact2);
         return Conduit;
+    },
+    MultiLink: function () {
+        var X = arguments.length;
+        if ((X & 1) > 0) {
+            throw "Both Component and Contact are required"
+        }
+        var Conn = new CConduit();
+
+        for (var i = 0; i < X; i++) {
+            Conn.Connect(X[i], X[i + 1]);
+        }
+        return Conn;
     }
 }
 
@@ -52,11 +64,11 @@ function C1Way(Init) {
 CComp.ExtendsTo(C1Way);
 
 C1Way.prototype.Connect = function (A, Contact) {
-    if (Contact !== "A" && Contact !== "B")
-        throw "Only contacts available are A and B";
+    if (Contact !== "In" && Contact !== "Out")
+        throw "Only contacts available are In and Out";
     var C = this._.Contacts[Contact];
     if (C) {
-        C === A ? 1 : C.Comp.Contact(A, Contact);
+        C === A ? 1 : C.Connect(A, Contact);
     }
     else {
         this._.Contacts[Contact] = A;
@@ -64,13 +76,12 @@ C1Way.prototype.Connect = function (A, Contact) {
 }
 
 C1Way.prototype.OnVibration = function (A, Contact, Val) {
-    //throw Contact +" " + A.Name;
-    if (this._.Contacts["A"] !== A)
+    if (Contact !== "In")
         return;
 
-    if (this._.Contacts["B"]) {
+    if (this._.Contacts[Contact] === A) {
 
-        this._.Contacts["B"].OnVibration(this, "B", Val);
+        this._.Contacts[Contact].OnVibration(this, Contact, Val);
     }
 }
 

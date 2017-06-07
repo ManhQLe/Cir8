@@ -22,6 +22,18 @@ var Cir8 = {
         this.Connect(A, Conduit, Contact1);
         this.Connect(B, Conduit, Contact2);
         return Conduit;
+    },
+    MultiLink: function () {
+        var X = arguments.length;
+        if ((X & 1) > 0) {
+            throw "Both Component and Contact are required"
+        }
+        var Conn = new CConduit();
+
+        for (var i = 0; i < X; i++) {
+            Conn.Connect(X[i], X[i + 1]);
+        }
+        return Conn;
     }
 }
 
