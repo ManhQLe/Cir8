@@ -1,5 +1,4 @@
-﻿/// <reference path="Ctrl8.js" />
-var Cir8 = {
+﻿var Cir8 = {
     Count: 0,
     Pack:function(init){
         return new CPack(init);
@@ -13,7 +12,7 @@ var Cir8 = {
         A.Connect(B, Contact);
         B.Connect(A, Contact);
     },
-    Dis: function (A, B, Contact) {
+    Disconnect: function (A, B, Contact) {
         A.DisconnectWith(B, Contact);
         B.DisconnectWith(A, Contact);
     },
@@ -30,7 +29,7 @@ var Cir8 = {
         }
         var Conn = new CConduit();
 
-        for (var i = 0; i < X; i++) {
+        for (var i = 0; i < X; i+2) {
             Conn.Connect(X[i], X[i + 1]);
         }
         return Conn;
@@ -98,7 +97,7 @@ function CConduit(Init){
     CConduit.baseConstructor.call(this,Init);
     this._.Contacts = [];
     
-    this.Prop("ParallelTrx", false);
+    this.Prop("ParallelTrx", true);
 
     this.CalcProp("Signal", function (name, storage) {
         return null
@@ -211,23 +210,25 @@ CPack.prototype.Connect = function (A, Contact) {
     }
 }
 
-CPack.prototype.OnVibration = function (FromComp, Contact,Val) {
+CPack.prototype.OnVibration = function (FromComp, Contact, Val) {
     var idx = this.Ins.indexOf(Contact);
     if (idx >= 0) {
         var K = this._.HasInputs[Contact];
         this._.HasInputs[Contact] = 1;
         this.Ports._.Contacts[Contact].v = Val;
+
+        //For Staged inputs
+        //Eventually K will be defined
+        (K === undefined) && ++this._.Collected == this.Ins.length ? this.FX() : 1;
+
         if (this.Staged) {
-            (K === undefined) && ++this._.Collected == this.Ins.length ?
-             (
-                 this.FX(),
-                 this._.Collected = 0,
-                 this._.HasInputs = {}
-             ) : 1;
+            if (this._.Collected >= this.Ins.length) {
+                this._.Collected = 0,
+                    this._.HasInputs = {}
+            }
         }
-        else {
-            ++this._.Collected >= this.Ins.length ?  this.FX() : 1;
-        }
+        else
+            K && this._.Collected >= this.Ins.length ? this.FX() : 1;
     }
 }
 
