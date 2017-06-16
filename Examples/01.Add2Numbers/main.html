@@ -1,0 +1,141 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Input And Output</title>
+    <link href="../Common.css" rel="stylesheet" />
+    <script src="../Ctrl8.js"></script>
+    <script src="../../src/browser/Cir8.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+<body>
+    <div class="FIELD">
+        <div class="FIELDTITLE">Number A</div>
+        <div class="FIELDVALUE">
+            <input class="DISPLAYBOX" long input id="INPUT1" />
+        </div>
+    </div>
+    <br />
+    <div class="FIELD">
+        <div class="FIELDTITLE">Number B</div>
+        <div class="FIELDVALUE">
+            <input class="DISPLAYBOX" id="INPUT2" long input />
+        </div>
+    </div>
+    <br />
+    <div class="FIELD">
+        <div class="FIELDTITLE">Number C</div>
+        <div class="FIELDVALUE">
+            <input class="DISPLAYBOX" id="INPUT3" long input />
+        </div>
+    </div>
+    <br/>
+    <div class="FIELD">
+        <div class="FIELDTITLE">(A + B)</div>
+        <div class="FIELDVALUE">
+            <input class="DISPLAYBOX" id="DISPLAY1" style="width:180px" output readonly />
+        </div>
+    </div>
+    <br />
+    <div class="FIELD">
+        <div class="FIELDTITLE">(A + B) x C</div>
+        <div class="FIELDVALUE">
+            <input class="DISPLAYBOX" id="DISPLAY2" style="width:180px" output readonly />
+        </div>
+    </div>
+    <script>
+        /*
+            To demonstrate the simplest form multi-input collection and reactive behavior :)
+
+            In this example we are going to do simple sum and multiply
+            (A + B) * C
+                                                 .----------.
+            .---------.                          | DISPLAY1 |
+            | Input A |---.                      '----------'
+            `---------'   |         .---------------.   |                   .------------.
+            .---------.   '--W1---->|  SUM 2 INPUTS |---'------W4---------->| MULTIPLY 2 |
+            | Input B |------W2---->|               |      .--------------->|   INPUTS   |
+            `---------'             '---------------'      |                '------.-----'
+                                                           |                       |
+            .---------.                                    |                       W5
+            | Input C |-----------------W3-----------------'                   .----------.
+            `---------'                                                        | DISPLAY2 |
+                                                                               '----------'
+
+
+
+        */
+
+        /************************INITIALIZE COMPONENTS************************/
+        function ManufactureInputChip(DOM) {
+            return new CPack({
+                "InitFX": function () { // This InitFX only run once when initialized
+                    var MeTheChip = this;
+                    $(this.Props.DOM)
+                    .on("input", function () {
+                        MeTheChip.Ports.OUT = Number.parseFloat(this.value); //Send value out at port name OUT
+                    })
+                },
+                "Props": {
+                    "DOM": DOM
+                }
+            })
+        }
+
+        function ManufactureOutput(DOM) {
+            return new CPack({
+                "Ins": ["IN"],
+                "FX": function () {                    
+                    $(this.Props.DOM).val(this.Ports.IN)
+                },
+                "Props": {
+                    "DOM": DOM
+                }
+            })
+        }
+
+        var InputA = ManufactureInputChip("#INPUT1");
+        var InputB = ManufactureInputChip("#INPUT2");
+        var InputC = ManufactureInputChip("#INPUT3");
+        var Display1 = ManufactureOutput("#DISPLAY1");
+        var Display2 = ManufactureOutput("#DISPLAY2");
+
+
+        var SumChip = new CPack({
+            "Ins": ["N1", "N2"],
+            "FX": function () {
+                var Ports = this.Ports;
+                Ports.SUM = Ports.N1 + Ports.N2;
+            }
+        })
+
+        var MultChip = new CPack({
+            "Ins": ["N1", "N2"],
+            "FX": function () {
+                var Ports = this.Ports;
+                Ports.PRODUCT = Ports.N1 * Ports.N2;
+            }
+        })
+        
+        /*-----------------------WIRING CIRCUIT------------------------*/
+        //We will utilize Cir8 Utitity Link method to connect chips
+        //because wire instances are not important in this case and we feel like we are lazy
+
+        Cir8.Link(InputA, "OUT", "N1", SumChip);
+        Cir8.Link(InputB, "OUT", "N2", SumChip);
+        Cir8.Link(InputC, "OUT", "N1", MultChip);
+
+        Cir8.MultiLink(SumChip, "SUM", Display1, "IN", MultChip, "N2"); //connect multiple components
+
+
+        Cir8.Link(MultChip, "PRODUCT", "IN", Display2);
+
+        /*
+          A(OUT)--->(N1)MySum[SUM](N2)<----(OUT)B
+          MySum(SUM)-->(N2)Mult[MULT]--->(IN)Disp1[DISP]
+          C(OUT)-->(N1)Mult(PRODUCT)--->(IN)Disp2[DISP]
+        */
+    </script>
+</body>
+</html>

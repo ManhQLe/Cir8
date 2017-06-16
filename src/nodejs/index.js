@@ -25,14 +25,15 @@ var Cir8 = {
         return Conduit;
     },
     MultiLink: function () {
-        var X = arguments.length;
+        var A = arguments
+        var X = A.length;
         if ((X & 1) > 0) {
             throw "Both Component and Contact are required"
         }
         var Conn = new CConduit();
 
-        for (var i = 0; i < X; i+2) {
-            Conn.Connect(X[i], X[i + 1]);
+        for (var i = 0; i < X; i += 2) {
+            Conn.Connect(A[i], A[i + 1]);
         }
         return Conn;
     }
@@ -64,11 +65,11 @@ function C1Way(Init) {
 CComp.ExtendsTo(C1Way);
 
 C1Way.prototype.Connect = function (A, Contact) {
-    if (Contact !== "In" && Contact !== "Out")
-        throw "Only contacts available are In and Out";
+    if (Contact !== "A" && Contact !== "B")
+        throw "Only contacts available are A and B";
     var C = this._.Contacts[Contact];
     if (C) {
-        C === A ? 1 : C.Connect(A, Contact);
+        C === A ? 1 : C.Comp.Contact(A, Contact);
     }
     else {
         this._.Contacts[Contact] = A;
@@ -76,12 +77,13 @@ C1Way.prototype.Connect = function (A, Contact) {
 }
 
 C1Way.prototype.OnVibration = function (A, Contact, Val) {
-    if (Contact !== "In")
+    //throw Contact +" " + A.Name;
+    if (this._.Contacts["A"] !== A)
         return;
 
-    if (this._.Contacts[Contact] === A) {
+    if (this._.Contacts["B"]) {
 
-        this._.Contacts[Contact].OnVibration(this, Contact, Val);
+        this._.Contacts["B"].OnVibration(this, "B", Val);
     }
 }
 
@@ -111,7 +113,7 @@ CComp.ExtendsTo(CConduit);
 
 CConduit.prototype.Connect = function (A, Contact) {
     this._.Contacts.every(function (Pair) {
-        return Pair.Comp !== A || Pair.Contact !== Contact
+        return Pair.Comp !== A && Pair.Contact !== Contact
     }) ?
         (
             this._.Contacts.push({
@@ -126,7 +128,7 @@ CConduit.prototype.Connect = function (A, Contact) {
 CConduit.prototype.OnVibration = function (FromComp, Contact, Val) {
     var me = this;
     this._.Contacts.forEach(function (Pair) {
-        if (Pair.Comp !== FromComp || Pair.Contact !== Contact) //Prevent bouncing OnVibration
+        if (Pair.Comp !== FromComp && Pair.Contact !== Contact) //Prevent bouncing OnVibration
             me.ParallelTrx ? setTimeout(CConduit.PVibrate, 0, Pair.Comp, me, Pair.Contact, Val)
                 : Pair.Comp.OnVibration(me, Pair.Contact, Val);
     });
@@ -137,7 +139,7 @@ CConduit.prototype.DisconnectWith = function (A, Contact) {
     var idx;
     this._.Contacts.every(function (Pair, i) {
         idx = i;
-        return Pair.Comp !== A || Pair.Contact !== Contact
+        return Pair.Comp !== A && Pair.Contact !== Contact
     }) ? 1 : (this._.Contacts.splice(idx, 1), A.DisconnectWith(this, Contact));
 }
 
@@ -212,6 +214,9 @@ CPack.prototype.Connect = function (A, Contact) {
 }
 
 CPack.prototype.OnVibration = function (FromComp, Contact, Val) {
+    if (!this.Ins.length)
+        this.FX();
+
     var idx = this.Ins.indexOf(Contact);
     if (idx >= 0) {
         var K = this._.HasInputs[Contact];

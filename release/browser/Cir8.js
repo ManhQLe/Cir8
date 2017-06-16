@@ -23,14 +23,15 @@
         return Conduit;
     },
     MultiLink: function () {
-        var X = arguments.length;
+        var A = arguments
+        var X = A.length;
         if ((X & 1) > 0) {
             throw "Both Component and Contact are required"
         }
         var Conn = new CConduit();
 
-        for (var i = 0; i < X; i+2) {
-            Conn.Connect(X[i], X[i + 1]);
+        for (var i = 0; i < X; i+=2) {
+            Conn.Connect(A[i], A[i + 1]);
         }
         return Conn;
     }
@@ -110,7 +111,7 @@ CComp.ExtendsTo(CConduit);
 
 CConduit.prototype.Connect = function (A, Contact) {
     this._.Contacts.every(function (Pair) {
-        return Pair.Comp !== A|| Pair.Contact !== Contact
+        return Pair.Comp !== A && Pair.Contact !== Contact
     }) ?
     (
         this._.Contacts.push({
@@ -125,7 +126,7 @@ CConduit.prototype.Connect = function (A, Contact) {
 CConduit.prototype.OnVibration = function (FromComp,Contact,Val) {
     var me = this;
     this._.Contacts.forEach(function (Pair) {
-        if (Pair.Comp !== FromComp || Pair.Contact !== Contact) //Prevent bouncing OnVibration
+        if (Pair.Comp !== FromComp && Pair.Contact !== Contact) //Prevent bouncing OnVibration
             me.ParallelTrx ? setTimeout(CConduit.PVibrate, 0, Pair.Comp, me, Pair.Contact, Val)
             : Pair.Comp.OnVibration(me, Pair.Contact, Val);
     });
@@ -136,7 +137,7 @@ CConduit.prototype.DisconnectWith = function (A, Contact) {
     var idx;
     this._.Contacts.every(function (Pair, i) {
         idx = i;
-        return Pair.Comp !== A || Pair.Contact !== Contact
+        return Pair.Comp !== A && Pair.Contact !== Contact
     }) ? 1 : (this._.Contacts.splice(idx, 1), A.DisconnectWith(this, Contact));
 }
 
@@ -211,6 +212,9 @@ CPack.prototype.Connect = function (A, Contact) {
 }
 
 CPack.prototype.OnVibration = function (FromComp, Contact, Val) {
+    if (!this.Ins.length)
+        this.FX();
+
     var idx = this.Ins.indexOf(Contact);
     if (idx >= 0) {
         var K = this._.HasInputs[Contact];

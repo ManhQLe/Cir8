@@ -1,0 +1,66 @@
+﻿body {
+    font-family:'Segoe UI'
+}
+
+.DISPLAYBOX {
+    border:1px solid #F0F0F0;
+    padding: 5px;
+    border-right:5px solid #ecf0f1;
+    outline:none;
+    box-sizing:border-box;
+}
+    .DISPLAYBOX[Short] {
+        width:53px;
+    }
+
+    .DISPLAYBOX[Long] {
+        width:80px;
+    }
+
+    .DISPLAYBOX[input] {
+        border-color:#2980b9;
+        border-right-color:#2980b9;
+    }
+
+    .DISPLAYBOX[input]:hover {
+        border-color:#3498db;
+        border-right-color:#3498db;
+    }
+
+    .DISPLAYBOX[input]:focus {
+        border-color:#3498db;
+        border-right-color:#3498db;
+    }
+
+    .DISPLAYBOX[output] {
+        border-color:#d35400;
+        border-right-color:#d35400;
+    }
+
+    .DISPLAYBOX[output]:hover {
+        border-color:#e67e22;
+        border-right-color:#e67e22;
+    }
+
+    .DISPLAYBOX[output]:focus {
+        border-color:#e67e22;
+        border-right-color:#e67e22;
+    }
+
+.FIELDTITLE {
+    display:inline-block;
+    padding:5px;
+    font-style:italic;
+}
+.FIELDVALUE {
+    display:inline-block;
+}
+
+.FIELD {
+    display:inline-flex;
+    flex-direction:row;
+}
+    .FIELD > .FIELDTITLE {
+        width:125px;
+    }
+

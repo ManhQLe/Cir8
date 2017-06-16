@@ -1,6 +1,6 @@
 {
   "name": "cir8",
-  "version": "0.0.5",
+  "version": "0.0.12",
   "description": "Circuit 8",
   "main": "nodejs/index.js",
   "author": {

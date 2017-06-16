@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Input And Output</title>
+    <link href="../Common.css" rel="stylesheet" />
+    <script src="../Ctrl8.js"></script>
+    <script src="../../src/browser/Cir8.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+<body>
+    <div class="FIELD">
+        <div class="FIELDTITLE">Input</div>
+        <div class="FIELDVALUE">
+            <input class="DISPLAYBOX" long input id="INPUT" />
+        </div>
+    </div>
+    <br />
+    <div class="FIELD">
+        <div class="FIELDTITLE">Is Number</div>
+        <div class="FIELDVALUE">
+            <input class="DISPLAYBOX" id="NUMDISPLAY" style="width:260px" output readonly/>
+        </div>
+    </div>
+    <br />
+    <div class="FIELD">
+        <div class="FIELDTITLE">Parity Check</div>
+        <div class="FIELDVALUE">
+            <input class="DISPLAYBOX" id="PARITYDISPLAY" style="width:260px" output readonly/>
+        </div>
+    </div>
+    <br />
+    Check console log as well :)
+    <script>
+        /*
+            To demonstrate the simplest form of reactive and modular programming in a new way
+
+            Entered value to input will be piped out to other outputs create an effect of reactive app.
+            
+            Expected behavior: One input, update 3 displays
+
+            Input---.---->LogConsole
+                    |
+                    +---->DisplayNumber
+                    |
+                    `---->DisplayParity
+
+        */
+
+        /************************INITIALIZE COMPONENTS************************/
+        var TextBoxChip = new CPack({            
+            "InitFX": function () { // This InitFX only run once
+                var MeTheChip = this;
+                $(this.Props.DOM)
+                .on("input", function () {
+                    MeTheChip.Ports.MYOUTPORT = this.value; //Send value out at port name MYOUTPORT
+                })                
+            },
+            "Props": {
+                "DOM":"#INPUT"
+            }
+        })
+
+        var LogChip = new CPack({
+            "Ins":["INPORT"], //Define input port
+            "FX": function () { //FX fired everytime the chip receive inputs
+                var data = this.Ports.INPORT; //Retrive data from INPORT
+                console.log("Logging input: " + data);
+            }
+        })
+
+        var DisplayNumberChip = new CPack({
+            "Ins": ["NUMBER"],           
+            "FX": function () {
+                var data = this.Ports.NUMBER;
+                $(this.Props.DOM).val(isNaN(data) ? "'" + data + "' is not a number":
+                    "The number is " + data
+                    );
+            },
+            "Props": {
+                "DOM": "#NUMDISPLAY"
+            }
+        })
+
+        var DisplayParity = new CPack({
+            "Ins": ["NUMBER"],
+            "FX": function () {
+                var data = this.Ports.NUMBER;
+                var text;
+                if (isNaN(data))
+                    text = "'" + data + "' is not a number"
+                else
+                    text = data & 1 ? "Odd Number" : "Even Number";
+
+                $(this.Props.DOM).val(text)
+            },
+            "Props": {
+                "DOM": "#PARITYDISPLAY"
+            }
+        })
+        /*-----------------------WIRING CIRCUIT------------------------*/
+        var Wire1 = new CConduit();
+        Wire1.Connect(TextBoxChip, "MYOUTPORT"); //One end of the wire connects to OUT of TextBoxChip
+        
+        //Other ends connect to 
+        Wire1.Connect(LogChip, "INPORT");
+        Wire1.Connect(DisplayNumberChip, "NUMBER");
+        Wire1.Connect(DisplayParity, "NUMBER");
+
+
+        
+    </script>
+</body>
+</html>

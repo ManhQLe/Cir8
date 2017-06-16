@@ -31,6 +31,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="Examples\00.InputAndOutput\main.html" />
     <Content Include="makerelease.bat" />
     <Content Include="package.json" />
     <Content Include="README.md" />
@@ -38,6 +39,9 @@
     <Content Include="release\README.md" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Examples\" />
+    <Folder Include="Examples\01.Add2Numbers\" />
+    <Folder Include="Examples\00.InputAndOutput\" />
     <Folder Include="release\browser\" />
     <Folder Include="release\nodejs\" />
     <Folder Include="src\" />
@@ -47,6 +51,8 @@
     <Folder Include="release\nodejs\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Examples\01.Add2Numbers\main.html" />
+    <Compile Include="Examples\Ctrl8.js" />
     <Compile Include="release\browser\Cir8.js" />
     <Compile Include="release\browser\Cir8.min.js" />
     <Compile Include="release\nodejs\index.js" />
