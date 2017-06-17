@@ -46,24 +46,15 @@
     </div>
     <script>
         /*
-            To demonstrate the simplest form of multi-input collection and reactive behavior :)
+            To demonstrate the simplest form of multi-order asynchronization
 
-            In this example we are going to do simple sum and multiply
-            (A + B) * C
-                                                 .----------.
-            .---------.                          | DISPLAY1 |
-            | Input A |---.                      '----------'
-            `---------'   |         .---------------.   |                   .------------.
-            .---------.   '--W1---->|  SUM 2 INPUTS |---'------W4---------->| MULTIPLY 2 |
-            | Input B |------W2---->|               |      .--------------->|   INPUTS   |
-            `---------'             '---------------'      |                '------.-----'
-                                                           |                       |
-            .---------.                                    |                       W5
-            | Input C |-----------------W3-----------------'                   .----------.
-            `---------'                                                        | DISPLAY2 |
-                                                                               '----------'
-
-
+            .-----.           .------------.
+            |  A  |-------+-->|  Async     |
+            '-----'     .-(-->|            |
+                        | |   '------------'
+            .-----.     | |       .----------.
+            |  B  |-----' '------>|          |
+            '-----'               '----------'
 
         */
 
@@ -127,7 +118,6 @@
         Cir8.Link(InputC, "OUT", "N1", MultChip);
 
         Cir8.MultiLink(SumChip, "SUM", Display1, "IN", MultChip, "N2"); //connect multiple components
-
 
         Cir8.Link(MultChip, "PRODUCT", "IN", Display2);
 

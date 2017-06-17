@@ -34,6 +34,8 @@
             Conn.Connect(A[i], A[i + 1]);
         }
         return Conn;
+    },
+    Board: function () {        
     }
 }
 

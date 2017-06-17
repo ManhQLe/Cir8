@@ -32,6 +32,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Examples\00.InputAndOutput\main.html" />
+    <Content Include="Examples\02.Async\main.html" />
+    <Content Include="Examples\Common.css" />
     <Content Include="makerelease.bat" />
     <Content Include="package.json" />
     <Content Include="README.md" />
@@ -42,6 +44,7 @@
     <Folder Include="Examples\" />
     <Folder Include="Examples\01.Add2Numbers\" />
     <Folder Include="Examples\00.InputAndOutput\" />
+    <Folder Include="Examples\02.Async\" />
     <Folder Include="release\browser\" />
     <Folder Include="release\nodejs\" />
     <Folder Include="src\" />
