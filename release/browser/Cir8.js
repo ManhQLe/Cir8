@@ -34,6 +34,8 @@
             Conn.Connect(A[i], A[i + 1]);
         }
         return Conn;
+    },
+    Board: function () {        
     }
 }
 
@@ -111,7 +113,7 @@ CComp.ExtendsTo(CConduit);
 
 CConduit.prototype.Connect = function (A, Contact) {
     this._.Contacts.every(function (Pair) {
-        return Pair.Comp !== A && Pair.Contact !== Contact
+        return Pair.Comp !== A || Pair.Contact !== Contact
     }) ?
     (
         this._.Contacts.push({
@@ -137,7 +139,7 @@ CConduit.prototype.DisconnectWith = function (A, Contact) {
     var idx;
     this._.Contacts.every(function (Pair, i) {
         idx = i;
-        return Pair.Comp !== A && Pair.Contact !== Contact
+        return Pair.Comp !== A || Pair.Contact !== Contact
     }) ? 1 : (this._.Contacts.splice(idx, 1), A.DisconnectWith(this, Contact));
 }
 
