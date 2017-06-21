@@ -34,27 +34,58 @@
     <div class="FIELD">
         <div class="FIELDTITLE">(A + B)</div>
         <div class="FIELDVALUE">
-            <input class="DISPLAYBOX" id="DISPLAY1" style="width:180px" output readonly />
+            <input class="DISPLAYBOX" id="DISPLAY1" style="width:180px" output readonly/>
         </div>
     </div>
     <br />
     <div class="FIELD">
         <div class="FIELDTITLE">(A + B) x C</div>
         <div class="FIELDVALUE">
-            <input class="DISPLAYBOX" id="DISPLAY2" style="width:180px" output readonly />
+            <input class="DISPLAYBOX" id="DISPLAY2" style="width:180px" output  readonly/>
         </div>
     </div>
+    <br />
+    <div class="FIELD">
+        <div class="FIELDTITLE">(A - B) </div>
+        <div class="FIELDVALUE">
+            <input class="DISPLAYBOX" id="DISPLAY3" style="width:180px" output readonly />
+        </div>
+    </div>
+    <br/>
+    <div class="FIELD">
+        <div class="FIELDTITLE">(A + B) x C + (A - B) </div>
+        <div class="FIELDVALUE">
+            <input class="DISPLAYBOX" id="DISPLAY4" style="width:180px" output readonly />
+        </div>
+    </div>
+    <br/>
+    <button type="button" onclick="$('input[output]').val('')">Clear Outputs</button>
+
     <script>
         /*
-            To demonstrate the simplest form of multi-order asynchronization
+            To demonstrate the simplest form of multi-order async, input-collection, and reactive programming
 
-            .-----.           .------------.
-            |  A  |-------+-->|  Async     |
-            '-----'     .-(-->|            |
-                        | |   '------------'
-            .-----.     | |       .----------.
-            |  B  |-----' '------>|          |
-            '-----'               '----------'
+            In this example we are going to do simple sum, multiply and division. They all take sometimes
+            to accomplish the task
+
+            (A + B) * C + (A - B)                          .----------.
+                                                           | DISPLAY3 |
+                                                           '----------'
+                                   .-----------.                 |
+                          .----->--N1 SUBTRACT |-----------------+-----W5----------------.
+                          |        '---N2------'                                         |
+                          |             |       .----------.                             |
+            .---------.   |     .--->---'       | DISPLAY1 |                             |
+            | Input A |---+     |               '----------'                             |       .-------.
+            `---------'   |     |  .---------.   |                   .--------------.    '------>N1 SUM2 |
+            .---------.   '--W1-|->|  SUM1   |---+------W4---------->IN1 MULTIPLY 2 |    .------>N2      |
+            | Input B |-----W2--+->|         |      .--------------->In2  INPUTS    |    |       '---+---'
+            `---------'            '---------'      |                '------+-------'    |           |
+                                                    |                       |------------'         W7|
+            .---------.                             |                       |W6                .----IN----.
+            | Input C OUT--------------W3-----------'                   .--IN------.           | DISPLAY4 |
+            `---------'                                                 | DISPLAY2 |           '----------'
+                                                                        '----------'
 
         */
 
@@ -77,7 +108,7 @@
         function ManufactureOutput(DOM) {
             return new CPack({
                 "Ins": ["IN"],
-                "FX": function () {                    
+                "FX": function () { //Logic function of the chip
                     $(this.Props.DOM).val(this.Ports.IN)
                 },
                 "Props": {
@@ -85,46 +116,74 @@
                 }
             })
         }
+        function ManufactureArithmetic(op) {
+            return new CPack({
+                "Ins": ["N1", "N2"],
+                "FX": function () { //Logic function of the chip
+                    var Ports = this.Ports;
+                    var Out;
+                    switch (this.Props.OP) {
+                        case "*":
+                            Out = Ports.N1 * Ports.N2;
+                            break;
+                        case "+":
+                            Out = Ports.N1 + Ports.N2;
+                            break;
+                        case "-":
+                            Out = Ports.N1 - Ports.N2;
+                            break;
+                        case "/":
+                            Out = Ports.N1 / Ports.N2;
+                            break;
+                    }
+                    //Simulate delayed calculation
+                    setTimeout(function(){
+                        Ports.OUT = Out;
+                    },Math.random()*3000);                    
+                },
+                "Props": {
+                    "OP": op
+                }
+            })
+        }
+
 
         var InputA = ManufactureInputChip("#INPUT1");
         var InputB = ManufactureInputChip("#INPUT2");
         var InputC = ManufactureInputChip("#INPUT3");
         var Display1 = ManufactureOutput("#DISPLAY1");
         var Display2 = ManufactureOutput("#DISPLAY2");
+        var Display3 = ManufactureOutput("#DISPLAY3");
+        var Display4 = ManufactureOutput("#DISPLAY4");
 
 
-        var SumChip = new CPack({
-            "Ins": ["N1", "N2"],
-            "FX": function () {
-                var Ports = this.Ports;
-                Ports.SUM = Ports.N1 + Ports.N2;
-            }
-        })
 
-        var MultChip = new CPack({
-            "Ins": ["N1", "N2"],
-            "FX": function () {
-                var Ports = this.Ports;
-                Ports.PRODUCT = Ports.N1 * Ports.N2;
-            }
-        })
+        var SumChip1 = ManufactureArithmetic("+");
+
+        var MultChip = ManufactureArithmetic("*");
+        var SubChip = ManufactureArithmetic("-");
+        var SumChip2 = ManufactureArithmetic("+");
         
         /*-----------------------WIRING CIRCUIT------------------------*/
         //We will utilize Cir8 Utitity Link method to connect chips
         //because wire instances are not important in this case and we feel like we are lazy
 
-        Cir8.Link(InputA, "OUT", "N1", SumChip);
-        Cir8.Link(InputB, "OUT", "N2", SumChip);
-        Cir8.Link(InputC, "OUT", "N1", MultChip);
+        var W1 = Cir8.MultiLink(InputA, "OUT", SumChip1, "N1", SubChip, "N1");
+        var W2 = Cir8.MultiLink(InputB, "OUT", SumChip1, "N2", SubChip, "N2");
 
-        Cir8.MultiLink(SumChip, "SUM", Display1, "IN", MultChip, "N2"); //connect multiple components
+        var W5 = Cir8.MultiLink(SubChip, "OUT", Display3, "IN", SumChip2, "N1");
+        var W4 = Cir8.MultiLink(SumChip1, "OUT", Display1, "IN", MultChip, "N1");
 
-        Cir8.Link(MultChip, "PRODUCT", "IN", Display2);
+        var W3 = Cir8.MultiLink(InputC, "OUT", MultChip, "N2");
 
-        /*
-          A(OUT)--->(N1)MySum[SUM](N2)<----(OUT)B
-          MySum(SUM)-->(N2)Mult[MULT]--->(IN)Disp1[DISP]
-          C(OUT)-->(N1)Mult(PRODUCT)--->(IN)Disp2[DISP]
+        var W6 = Cir8.MultiLink(Display2, "IN", MultChip, "OUT", SumChip2, "N2");
+        var W7 = Cir8.MultiLink(Display4,"IN",SumChip2,"OUT")
+
+
+        
+
+        /* DESCRIPTION OF CIRCUIT
+          W1---->--A(OUT)-----(N1)SumChip1-----(N1)SubChip
         */
     </script>
 </body>
