@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Examples\00.InputAndOutput\main.html" />
-    <Content Include="Examples\03.TimeMeter\main.html" />
+    <Content Include="Examples\03.LoopAndC1Way\main.html" />
     <Content Include="Examples\02.Async\main.html" />
     <Content Include="Examples\04.More complex Async\main.html" />
     <Content Include="Examples\Common.css" />
@@ -46,7 +46,7 @@
     <Folder Include="Examples\" />
     <Folder Include="Examples\01.Add2Numbers\" />
     <Folder Include="Examples\00.InputAndOutput\" />
-    <Folder Include="Examples\03.TimeMeter\" />
+    <Folder Include="Examples\03.LoopAndC1Way\" />
     <Folder Include="Examples\04.More complex Async\" />
     <Folder Include="Examples\02.Async\" />
     <Folder Include="release\browser\" />
