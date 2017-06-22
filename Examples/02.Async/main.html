@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title>Input And Output</title>
+    <title>Multi Order Async</title>
     <link href="../Common.css" rel="stylesheet" />
     <script src="../Ctrl8.js"></script>
     <script src="../../src/browser/Cir8.js"></script>
@@ -66,7 +66,7 @@
             To demonstrate the simplest form of multi-order async, input-collection, and reactive programming
 
             In this example we are going to do simple sum, multiply and division. They all take sometimes
-            to accomplish the task
+            to accomplish the tasks. The chips have dependencies have to wait on other before execution
 
             (A + B) * C + (A - B)                          .----------.
                                                            | DISPLAY3 |
@@ -179,11 +179,15 @@
         var W6 = Cir8.MultiLink(Display2, "IN", MultChip, "OUT", SumChip2, "N2");
         var W7 = Cir8.MultiLink(Display4,"IN",SumChip2,"OUT")
 
-
         
-
         /* DESCRIPTION OF CIRCUIT
           W1---->--A(OUT)-----(N1)SumChip1-----(N1)SubChip
+          W2---->--B(OUT)-----(N2)SumChip1-----(N2)SubChip
+          W3---->--C(OUT)-----(N1)MultChip
+          W4---->--SumChip1(OUT)---(IN)Display1----(N1)MultChip
+          W5---->--SubChip(OUT)---(IN)Display3---(N1)SumChip2
+          W6-------Display2(IN)---<---(OUT)MultChip--->--(N2)SumChip2
+          W7-----(IN)Display4---(OUT)Display4
         */
     </script>
 </body>

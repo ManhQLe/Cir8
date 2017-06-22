@@ -65,8 +65,8 @@ function C1Way(Init) {
 CComp.ExtendsTo(C1Way);
 
 C1Way.prototype.Connect = function (A, Contact) {
-    if (Contact !== "In" && Contact !== "Out")
-        throw "Only contacts available are In and Out";
+    if (Contact !== "IN" && Contact !== "OUT")
+        throw "Only contacts available are IN and OUT";
     var C = this._.Contacts[Contact];
     if (C) {
         C === A ? 1 : C.Comp.Contact(A, Contact);
@@ -78,9 +78,9 @@ C1Way.prototype.Connect = function (A, Contact) {
 
 C1Way.prototype.OnVibration = function (A, Contact, Val) {
 
-    if (Contact == "In" && this._.Contacts["In"] === A) {
-        if (this._.Contacts["Out"]) {
-            this._.Contacts["Out"].OnVibration(this, "Out", Val);
+    if (Contact == "IN" && this._.Contacts["IN"] === A) {
+        if (this._.Contacts["OUT"]) {
+            this._.Contacts["OUT"].OnVibration(this, "OUT", Val);
         }
     }
 }

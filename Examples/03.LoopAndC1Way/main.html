@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Input And Output</title>
+    <link href="../Common.css" rel="stylesheet" />
+    <script src="../Ctrl8.js"></script>
+    <script src="../../src/browser/Cir8.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style type="text/css">
+        .NUMBER {
+           border:1px solid #F44336;
+           border-radius:3px;
+           padding:5px;
+           display:inline-block;
+           margin:1px;
+        }
+        .ROLL {
+            display:inline-block;
+            overflow-x:hidden;
+            white-space:nowrap;
+            max-width:270px;
+
+            border:1px solid #F0F0F0;            
+        }
+    </style>
+</head>
+<body>
+    <div class="FIELD">
+        <div class="FIELDTITLE">Input</div>
+        <div class="FIELDVALUE">
+            <input class="DISPLAYBOX" long input id="INPUT1" />
+        </div>
+    </div>    
+    <br />
+    <button type="button" id="START">Start</button>    
+    <hr/>
+    <div class="ROLL" id="DISPLAY">
+    </div>
+  
+
+    <script>
+        /*
+            To demonstrate the simplest form of loop and the usage of C1Way component
+
+            In this example we are going to create a circuit which will increase a number by 1 
+            The chip that generates the next number will be take on some random delay.
+            
+            COLLECTOR: will accumulate outputs from ADDCHIP to an array and send info to DISP
+
+            Input is going to be a number
+
+            * Introduction to C1Way
+            Symbol: <] or [>
+            Effect: Make sure information flow in one direction
+
+            * We would not want the collector to collect information from User input so we introduce
+            C1Way to prevent information being propagated to Collector
+            
+
+
+                W1 (Always 1)
+                |         .--------------.            .-----------.    .------.
+                '---------|  ADD CHIP    |-----W3-+---| COLLECTOR |----| DISP |
+              W2----+-----|              |        |   '-----------'    '------'
+                    |     '--------------'        |
+                    '--------------<]-------------'
+
+        */
+
+        /************************INITIALIZE COMPONENTS************************/
+        var ACCChip = new CPack({
+            "Ins":["I"],
+            "FX": function () {
+                this.Props.A.push(this.Ports.I);
+                this.Ports.O = this.Props.A;
+            },
+            Props: {
+                "A":[]
+            }
+        })
+        
+        var DispChip = new CPack({
+            "Ins": ["I"],
+            "FX": function () {
+                var I = this.Ports.I;
+                var DOM = document.querySelector(this.Props.DOM);
+
+                var D3Data = d3.select(DOM).selectAll("span.NUMBER").data(I);
+                D3Data.enter()
+                .append("span")
+                .attr("class", "NUMBER")
+                .text(function (d) { return d });
+                D3Data.text(function (d) { return d });
+                D3Data.exit().remove();
+                
+                //Swing to the end
+                $(DOM).animate({ scrollLeft: DOM.scrollWidth }, 800, 'easeInOutCubic');
+
+            },
+            "Props": {
+                "DOM":"#DISPLAY"
+            }
+        })
+
+        function ManufactureArithmetic(op) {
+            return new CPack({
+                "Ins": ["N1", "N2"],
+                "FX": function () { //Logic function of the chip
+                    var Ports = this.Ports;
+                    var Out;
+                    switch (this.Props.OP) {
+                        case "*":
+                            Out = Ports.N1 * Ports.N2;
+                            break;
+                        case "+":
+                            Out = Ports.N1 + Ports.N2;
+                            break;
+                        case "-":
+                            Out = Ports.N1 - Ports.N2;
+                            break;
+                        case "/":
+                            Out = Ports.N1 / Ports.N2;
+                            break;
+                    }
+                    //Simulate delayed calculation
+                    setTimeout(function () {
+                        Ports.OUT = Out;
+                    }, 500 + Math.random() * 1500);
+                },
+                "Props": {
+                    "OP": op
+                }
+            })
+        }
+
+        var Adder = ManufactureArithmetic("+");
+
+        var OneWayChip = new C1Way();
+
+       
+        /*-----------------------WIRING CIRCUIT------------------------*/
+        //We will utilize Cir8 Utitity Link method to connect chips
+        //because wire instances are not important in this case and we feel like we are lazy
+        var W1 = new CConduit();
+        W1.Connect(Adder, "N1");
+        var W2 = Cir8.MultiLink(OneWayChip, "OUT", Adder, "N2");
+        var W3 = Cir8.MultiLink(OneWayChip, "IN", Adder, "OUT", ACCChip, "I");
+        var W4 = Cir8.MultiLink(ACCChip, "O", DispChip, "I");
+
+        W1.Signal = 1 //Send signal 1 to N1 of Adder
+        //W2 will be used for click event
+        
+
+        function Start() {
+            $(this).prop("disabled", true);
+
+            var N = parseFloat($("#INPUT1").val());
+            if (!isNaN(N)) {
+                W2.Signal = N;
+                $(this).off("click", Start);
+            } else
+                $(this).prop("disabled", false);
+        }
+
+        $(this).on("click", Start);
+
+
+        /* DESCRIPTION OF CIRCUIT
+          W1---->--(N1)Adder
+          W2---->---(N2)Adder---<]----W3-->--(I)ACCChip(O)--->--W4--(I)DispChip
+        */
+    </script>
+</body>
+</html>
