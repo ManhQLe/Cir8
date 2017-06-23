@@ -224,7 +224,7 @@ CPack.prototype.OnVibration = function (FromComp, Contact, Val) {
 
         //For Staged inputs
         //Eventually K will be defined
-        (K === undefined) && ++this._.Collected == this.Ins.length ? this.FX() : 1;
+        (K === undefined) && ++this._.Collected == this.Ins.length ? this.FX(Contact) : 1;
 
         if (this.Staged) {
             if (this._.Collected >= this.Ins.length) {
@@ -233,7 +233,7 @@ CPack.prototype.OnVibration = function (FromComp, Contact, Val) {
             }
         }
         else
-            K && this._.Collected >= this.Ins.length ? this.FX() : 1;
+            K && this._.Collected >= this.Ins.length ? this.FX(Contact) : 1;
     }
 }
 
@@ -247,10 +247,60 @@ CPack.prototype.DisconnectWith = function (A, Contact) {
     }
 }
 
+function CCharger(init) {
+    CCharger.baseConstructor.call(this, init);
+    this._.Contacts = {};
+    this._.COUNT = 0;
+    this.Prop("Collection", []);
+    this.Prop("MAX", 1);
+    this.Prop("DischargeFX", function () { });
+}
+
+CComp.ExtendsTo(CCharger);
+
+
+CCharger.prototype.Connect = function (A, Contact) {
+    var C = this._.Contacts[Contact];
+    if (C) {
+        C === A ? 1 : C.Comp.Contact(A, Contact);
+    }
+    else {
+        this._.Contacts[Contact] = A;
+    }
+}
+
+CCharger.prototype.OnVibration = function (A, Contact, Val) {
+    var Cts = this._.Contacts;
+    var C = Cts[Contact];
+    if (C === A) {
+        if (++this._.COUNT === this.Collection.length) {
+            this.Collection.push(Val);
+            var Col = this.Collection;
+            this.Collection = [];
+            for (var c in Cts) {
+                Cts[c].OnVibration(this, c, Col);
+            }
+            this._.COUNT = 0;
+
+            this.DischargeFX(Col,Contact);
+        }
+    }
+}
+
+CCharger.prototype.DisconnectWith = function (A, Contact) {
+    var C = this._.Contacts[Contact];
+    if (C) {
+        delete this._.Contacts[Contact];
+        A.DisconnectWith(this, Contact);
+    }
+}
+
+
 module.exports = {
     "Cir8": Cir8,
     "CComp": CComp,
     "CPack": CPack,
     "CConduit": CConduit,
-    "C1Way": C1Way
+    "C1Way": C1Way,
+    "CCharger": CCharger
 }
