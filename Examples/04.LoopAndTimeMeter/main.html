@@ -7,9 +7,9 @@
     <link href="../Common.css" rel="stylesheet" />
     <script src="../Ctrl8.js"></script>
     <script src="../../src/browser/Cir8.js"></script>
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="../d3.v4.min.js"></script>
+    <!--<script src="../jquery-3.2.1.min.js"></script>-->
+    <script src="../jquery-ui.min.js"></script>
     <style type="text/css">
         .NUMBER {
            border:1px solid #F44336;
@@ -41,38 +41,46 @@
     <div class="ROLL" id="DISPLAY">
     </div>
   
-
     <script>
         /*
-            To demonstrate the simplest form of loop and the usage of C1Way component
+            To demonstrate the simplest form of loop and time measurement
 
-            In this example we are going to create a circuit which will increase a number by 1 
-            The chip that generates the next number will be take on some random delay.
-            
-            COLLECTOR: will accumulate outputs from ADDCHIP to an array and send info to DISP
-
-            Input is going to be a number
-
-            * Introduction to C1Way
-            Symbol: <] or [>
-            Effect: Make sure information flow in one direction
-
-            * We would not want the collector to collect information from User input so we introduce
-            C1Way to prevent information being propagated to Collector
-            
-
-
-                W1 (Always 1)
-                |         .--------------.            .-----------.    .------.
-                '---------|  ADD CHIP    |-----W3-+---| COLLECTOR |----| DISP |
-              W2----+-----|              |        |   '-----------'    '------'
-                    |     '--------------'        |
-                    '--------------<]-------------'
+                                                     .------.
+                                                     | DISP |
+                W1(1)--W1->----.                     '---+--'
+                               |                         |
+             .-----.        .--+-----.             .-----+-----.
+             |  A  |----+-->| ADD 1  |-->--+-W3----| Collector |
+             '-----'    |   '--------'     |       '-----------'
+                        |                  |        .--------.
+                        +----W2----<]------+------->| CLOCK2 |
+                        |                           '----+---'
+                    .---+----.      .-----------.        |
+                    | CLOCK1 |----->| TIME CHART|<-------'
+                    '--------'      '-----------'
 
         */
+        /************************INITIALIZE COMPONENTS************************/        
+        function ManufactorTimeClock() {            
+            return new CPack({
+                "FX": function () {
+                    this.Ports.O = Date.now();
+                }
+            })
+        }
 
-        /************************INITIALIZE COMPONENTS************************/
-        
+        var TimeChart = new CPack({
+            "Ins":["T1","T2"],
+            "FX": function () {
+
+            },
+            "Props": {
+                "DOM": "#CHART > g"
+
+            }
+        })
+
+
         var ACCChip = new CPack({
             "Ins":["I"],
             "FX": function () {

@@ -32,9 +32,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Examples\00.InputAndOutput\main.html" />
+    <Content Include="Examples\04.LoopAndTimeMeter\main.html" />
     <Content Include="Examples\03.LoopAndC1Way\main.html" />
     <Content Include="Examples\02.Async\main.html" />
-    <Content Include="Examples\04.More complex Async\main.html" />
+    <Content Include="Examples\05.More complex Async\main.html" />
     <Content Include="Examples\Common.css" />
     <Content Include="makerelease.bat" />
     <Content Include="package.json" />
@@ -46,8 +47,9 @@
     <Folder Include="Examples\" />
     <Folder Include="Examples\01.Add2Numbers\" />
     <Folder Include="Examples\00.InputAndOutput\" />
+    <Folder Include="Examples\04.LoopAndTimeMeter\" />
     <Folder Include="Examples\03.LoopAndC1Way\" />
-    <Folder Include="Examples\04.More complex Async\" />
+    <Folder Include="Examples\05.More complex Async\" />
     <Folder Include="Examples\02.Async\" />
     <Folder Include="release\browser\" />
     <Folder Include="release\nodejs\" />
@@ -60,6 +62,9 @@
   <ItemGroup>
     <Compile Include="Examples\01.Add2Numbers\main.html" />
     <Compile Include="Examples\Ctrl8.js" />
+    <Compile Include="Examples\d3.v4.min.js" />
+    <Compile Include="Examples\jquery-3.2.1.min.js" />
+    <Compile Include="Examples\jquery-ui.min.js" />
     <Compile Include="release\browser\Cir8.js" />
     <Compile Include="release\browser\Cir8.min.js" />
     <Compile Include="release\nodejs\index.js" />
