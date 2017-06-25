@@ -17,7 +17,7 @@
 3. Connect components to create program's circuit.
 4. Send intial inputs to boot the flow.
 
-## Cir8 - A javascript library support M.A.R Model
+## Cir8 - A javascript library supports M.A.R Model
 
 ### Node JS installation
 > npm install cir8 --save
