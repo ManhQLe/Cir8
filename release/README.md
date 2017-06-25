@@ -22,6 +22,9 @@
 ### Node JS installation
 > npm install cir8 --save
 
+### Dependencies
+0. Ctrl8
+
 ### Symbols and Defintions
 0. Circuit/Flow chart
 > A collection of Modules/Packs connected to each other by conduits/media.
@@ -41,28 +44,28 @@
 ### Visualization 
 
 0. Example of Circuit
-```javascript
-															.-------------.
-															| CONSOLE LOG |
-														    '-------IN----'
-											 .--+---------.          |
-										.----|IN|  POW(2) |----W4----'
-	         .---+--------------.		|    '--+---------'
+```
+						   		.-------------.
+						   		| CONSOLE LOG |
+						   		'-------IN----'
+				    		 .--+---------.          |
+				            .----|IN|  POW(2) |----W4----'
+		 .---+--------------.	    |    '--+---------'
 	W1--->---+IN1|          .---|       |     .------------.
 	         |   |  ADDCHIP |OUT+--W3---+-->--+IN|  PRINT  |
 	W2--->---+IN2|	        '---|             '------------'
-			 `---+--------------'
+		 `---+--------------'
 
 	W1,W2,W3 are conduits which connects module
 
 
 ```           
 1. Example of module
-```javascript
-        .------+------------+-------.
-		|  IN  | PROGRAMMER	|  OUT  |
-		| PORTS| DEFINED	| PORTS |
-		|      | LOGIC		|       |
+```
+        	.------+------------+-------.
+		|  IN  | PROGRAMMER |  OUT  |
+		| PORTS| DEFINED    | PORTS |
+		|      | LOGIC	    |       |
 		'------+------------+-------'
 ```
 

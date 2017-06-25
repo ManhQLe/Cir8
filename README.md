@@ -165,9 +165,6 @@
 
 
 ## ROAD MAP
-[ ]. Stable Release for C#.NET.
-[ ]. Stable Release for C++.
-[ ]. Stable Release for Java.
 [ ]. Circuit description
 > Where programmers describe a circuit in string variable. And have a factory to generate circuit.
 ```html
