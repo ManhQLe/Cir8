@@ -3,13 +3,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title>Input And Output</title>
+    <title>Loop and Time Meter</title>
     <link href="../Common.css" rel="stylesheet" />
     <script src="../Ctrl8.js"></script>
     <script src="../../src/browser/Cir8.js"></script>
     <script src="../d3.v4.min.js"></script>
-    <!--<script src="../jquery-3.2.1.min.js"></script>-->
-    <script src="../jquery-ui.min.js"></script>
+    <script src="../d3-selection-multi.min.js"></script>
+    <script src="../jquery-3.2.1.min.js"></script>
+    <!--<script src="../jquery-ui.min.js"></script>-->
     <style type="text/css">
         .NUMBER {
            border:1px solid #F44336;
@@ -26,6 +27,9 @@
 
             border:1px solid #F0F0F0;            
         }
+        rect {
+            fill:#FFC107;
+        }
     </style>
 </head>
 <body>
@@ -40,14 +44,41 @@
     <hr/>
     <div class="ROLL" id="DISPLAY">
     </div>
-  
+    <br/>
+    <svg style="width:500px;height:270px;overflow:hidden;border:1px solid #F0F0F0" id="CHART">
+        <g></g>
+    </svg>
     <script>
         /*
-            To demonstrate the simplest form of loop and time measurement
+            To demonstrate the simplest form of loop and the USAGE of "Staged"
+
+            Introduction to "Staged" property of CPack                      
+
+            By default, object/chip instantiated from CPack has Stage = false.
+            
+            *REMINDER: FX (user-defined logic) will ONLY get fired when CPack collects ALL the input values.
+
+            With Staged = fasle, when a CPack component collects enough inputs to its in-ports.
+            FX (user-defined logic) will get fired. From that point forward, FX will get fired EVERY time an
+            input ports receive a value.
+
+            With Staged = true, FX will get fired when CPack Component collects ALL the inputs. Once FX is finished executing,
+            ALL the inputs will be CLEARED out. CPack component will start collecting next batches of inputs again for
+            the next FX calls.
+
+            -------------------------------------------------
+            In this example, we will configure staged for TIMECHART chip. We want to capture how long
+            it takes ADD1 chip to do its job. So we create 2 new CPack components called CLOCK1, CLOCK2
+            to capture timestamps. Then send these two to TIMECHART to calculate the differences.
+
+            TIMECHART is configure Stage = true. So that its inputs will get cleared out for the next
+            measurement
+           
+
 
                                                      .------.
                                                      | DISP |
-                W1(1)--W1->----.                     '---+--'
+                (1)---W1-->----.                     '---+--'
                                |                         |
              .-----.        .--+-----.             .-----+-----.
              |  A  |----+-->| ADD 1  |-->--+-W3----| Collector |
@@ -60,23 +91,73 @@
                     '--------'      '-----------'
 
         */
-        /************************INITIALIZE COMPONENTS************************/        
+        /************************INITIALIZE COMPONENTS************************/
+
+        /*Manufactor TimeClock*/
         function ManufactorTimeClock() {            
             return new CPack({
                 "FX": function () {
-                    this.Ports.O = Date.now();
+                    this.Ports.O = Date.now();                    
                 }
             })
         }
 
+        var MAX = 0;
+
         var TimeChart = new CPack({
             "Ins":["T1","T2"],
             "FX": function () {
+                
+                var Ports = this.Ports;
+                var Dur = Ports.T2 - Ports.T1;
+ 
+                var Data = this.Props.Data;
+                var Props = this.Props;
+                Data.push(Dur);
+                if (Data.length > this.Props.MAX) {
+                    Data.splice(0, Data.length - this.Props.MAX);
+                }
+                var max = Math.max.apply(null, Data);
+                MAX = Math.max(max, MAX);
 
+                var h = d3.scaleLinear().domain([0, MAX]).range([0, Props.CH]);
+                
+                var X = d3.select(Props.DOM).selectAll("rect").data(Data);
+                
+                var Division = Props.CW / Data.length;
+                var BarW = Division * .9;
+                var Gap = Division * .1;
+                
+                var ChartProps = {
+                    "width": function (d) {
+                        return BarW
+                    },
+                    "height": function (d) {                        
+                        return h(d);
+                    },
+                    "transform": function (d, i) {
+                        return "translate(" + (Division * i) + "," + (Props.CH - h(d)) + ")";
+                    }
+                }
+
+                X.enter().append("rect")
+                //.transition().duration(300).ease(d3.easeSinInOut)
+                .attrs(ChartProps);
+
+                X
+                //.transition().duration(300).ease(d3.easeSinInOut)
+                .attrs(ChartProps);
+
+              
+              
             },
+            "Staged":true,
             "Props": {
-                "DOM": "#CHART > g"
-
+                "DOM": "#CHART > g",
+                "Data": [],
+                "MAX": 80,
+                "CH":270,
+                "CW":500
             }
         })
 
@@ -85,6 +166,8 @@
             "Ins":["I"],
             "FX": function () {
                 this.Props.A.push(this.Ports.I);
+                if (this.Props.A.length > 170)
+                    this.Props.A.splice(0, 1);
                 this.Ports.O = this.Props.A;
             },
             Props: {
@@ -107,7 +190,7 @@
                 D3Data.exit().remove();
                 
                 //Swing to the end
-                $(DOM).animate({ scrollLeft: DOM.scrollWidth }, 800, 'easeInOutCubic');
+                $(DOM).animate({ scrollLeft: DOM.scrollWidth }, 200, 'swing');
 
             },
             "Props": {
@@ -138,7 +221,7 @@
                     //Simulate delayed calculation
                     setTimeout(function () {
                         Ports.OUT = Out;
-                    }, 500 + Math.random() * 1500);
+                    }, 100 + Math.random() * 150);
                 },
                 "Props": {
                     "OP": op
@@ -147,18 +230,23 @@
         }
 
         var Adder = ManufactureArithmetic("+");
-
         var OneWayChip = new C1Way();
 
+        var Clock1 = ManufactorTimeClock();
+        var Clock2 = ManufactorTimeClock();
+         
        
         /*-----------------------WIRING CIRCUIT------------------------*/
         //We will utilize Cir8 Utitity Link method to connect chips
         //because wire instances are not important in this case and we feel like we are lazy
         var W1 = new CConduit();
         W1.Connect(Adder, "N1");
-        var W2 = Cir8.MultiLink(OneWayChip, "OUT", Adder, "N2");
-        var W3 = Cir8.MultiLink(OneWayChip, "IN", Adder, "OUT", ACCChip, "I");
+        var W2 = Cir8.MultiLink(OneWayChip, "OUT", Adder, "N2", Clock1, "I");
+        var W3 = Cir8.MultiLink(OneWayChip, "IN", Adder, "OUT", ACCChip, "I", Clock2, "I");
         var W4 = Cir8.MultiLink(ACCChip, "O", DispChip, "I");
+
+        var W5 = Cir8.Link(Clock1, "O", "T1", TimeChart)
+        var W6 = Cir8.Link(Clock2,"O","T2",TimeChart)
 
         W1.Signal = 1 //Send signal 1 to N1 of Adder
         //W2 will be used for click event
@@ -180,7 +268,8 @@
 
         /* DESCRIPTION OF CIRCUIT
           W1---->--(N1)Adder
-          W2---->---(N2)Adder---<]----W3-->--(I)ACCChip(O)--->--W4--(I)DispChip
+          W2---->---(I)Clock1---(N2)Adder---<]----W3-->--(I)ACCChip(O)--->--W4--(I)DispChip
+          W3---->---(I)Clock2(O)-->---(T2)TimeChart(T1)--<--W6---(O)Clock1
         */
     </script>
 </body>

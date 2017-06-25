@@ -14,6 +14,8 @@
 
 @%JAVA% -jar %COMPILE% --compilation_level SIMPLE_OPTIMIZATIONS --js %SRCBROWSERPATH%\Cir8.js --js_output_file %DSTBROWSERPATH%\Cir8.min.js
 @xcopy %SRCBROWSERPATH%\Cir8.js %DSTBROWSERPATH% /y
+@xcopy ..\Ctrl8\release\browser\*.js %DSTBROWSERPATH% /y
+
 
 @echo ------Releasing Node Scripts------
 
