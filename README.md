@@ -22,6 +22,9 @@
 ### Node JS installation
 > npm install cir8 --save
 
+### Dependencies
+0. Ctrl8
+
 ### Symbols and Defintions
 0. Circuit/Flow chart
 > A collection of Modules/Packs connected to each other by conduits/media.
