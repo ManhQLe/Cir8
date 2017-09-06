@@ -126,7 +126,10 @@ CConduit.prototype.Connect = function (A, Contact) {
 CConduit.prototype.OnVibration = function (FromComp,Contact,Val) {
     var me = this;
     this._.Contacts.forEach(function (Pair) {
-        if (Pair.Comp !== FromComp && Pair.Contact !== Contact) //Prevent bouncing OnVibration
+        if (Pair.Comp == FromComp && Pair.Contact == Contact) {
+            //Prevent bouncing OnVibration
+        }
+        else
             me.ParallelTrx ? setTimeout(CConduit.PVibrate, 0, Pair.Comp, me, Pair.Contact, Val)
             : Pair.Comp.OnVibration(me, Pair.Contact, Val);
     });
