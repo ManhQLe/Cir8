@@ -19,7 +19,9 @@ var Cir8 = {
         B.DisconnectWith(A, Contact);
     },
     Link: function (A, Contact1, Contact2, B) {
-        var Conduit = new CConduit();
+        var Conduit = new CConduit({
+            "Name": name ? name : ("Wire" + Cir8.Count++)
+        });
         this.Connect(A, Conduit, Contact1);
         this.Connect(B, Conduit, Contact2);
         return Conduit;
@@ -41,7 +43,7 @@ var Cir8 = {
 
 function CComp(Init) {
     CComp.baseConstructor.call(this, Init);
-    this.Prop("Name", (Date.now() + (CComp.CCount++)));
+    this.Prop("Name", (Date.now() + (CComp.Count++)));
 }
 
 CComp.Count = 0;
